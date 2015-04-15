@@ -23,34 +23,33 @@ subj_file.close()
 #loop through subjects
 for subj in subjects:
 	
-	if subj=='re04':
-		data_path = os.path.join(PREF_DIR, 'data',subj,'brik',subj+'.results/') #AFNI data dir
+	data_path = os.path.join(PREF_DIR, 'data',subj,'brik',subj+'.results/') #AFNI data dir
 
-		#local smoothness file for each subject
-		smoothness_file = data_path + 'smoothness.txt'
-		if os.path.exists(smoothness_file): #remove old if it exists already
-			os.system('rm ' + smoothness_file)
-		
-		#afni command for estimating smoothness
-		cmd_str = '3dFWHMx -arith -mask ' + data_path + 'mask_anat.' + subj + '+tlrc -dset ' + data_path + 'GLM_residuals+tlrc -out ' + smoothness_file
-		print cmd_str
-		#nasty subprocess stuff to assign the output of a shell script to a variable
-		proc=subprocess.Popen(cmd_str,shell=True,stdout=subprocess.PIPE, )
-		output = proc.communicate()[0]
-		output = output.strip('\n')
-		output = output.split('  ')
+	#local smoothness file for each subject
+	smoothness_file = data_path + 'smoothness.txt'
+	if os.path.exists(smoothness_file): #remove old if it exists already
+		os.system('rm ' + smoothness_file)
 	
-		# compile smoothness data to a text file
-		s_file = open(final_smooth,'a')
-		s_file.write(str(float(output[0])))
-		s_file.write('\t')
-		s_file.write(str(float(output[1])))
-		s_file.write('\t')
-		s_file.write(str(float(output[2])))
-		s_file.write('\n')
-		s_file.close()
+	#afni command for estimating smoothness
+	cmd_str = '3dFWHMx -arith -mask ' + data_path + 'mask_anat.' + subj + '+tlrc -dset ' + data_path + 'GLM_residuals+tlrc -out ' + smoothness_file
+	print cmd_str
+	#nasty subprocess stuff to assign the output of a shell script to a variable
+	proc=subprocess.Popen(cmd_str,shell=True,stdout=subprocess.PIPE, )
+	output = proc.communicate()[0]
+	output = output.strip('\n')
+	output = output.split('  ')
 
-		print "finished " + subj + "!!"
+	# compile smoothness data to a text file
+	s_file = open(final_smooth,'a')
+	s_file.write(str(float(output[0])))
+	s_file.write('\t')
+	s_file.write(str(float(output[1])))
+	s_file.write('\t')
+	s_file.write(str(float(output[2])))
+	s_file.write('\n')
+	s_file.close()
+
+	print "finished " + subj + "!!"
 
 #Take average across subjects, then use this command once to run simulation
 # 3dClustSim -mask master_funcres+tlrc -fwhmxyz 3.2647 3.0611 2.9082 -pthr .05 .02 .01 .005 .001
